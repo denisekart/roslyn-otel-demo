@@ -1,0 +1,90 @@
+@using Microsoft.AspNetCore.SignalR.Client
+@using System.Collections.Specialized
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
+
+<hr/>
+<h5>Telemetry    <button type="button" class="btn btn-sm btn-outline-warning" @onclick="Clear">Clear</button></h5>
+
+<div class="telemetry-code">
+    @foreach (var item in _telemetry)
+    {
+        <pre style="margin-left: @(item.GetDepth(_telemetry) * 15)px;" class="telemetry-code-item"><span style="color: @item.ToColorCode(); font-weight: bolder">@item.ActivityName</span>, <span style="font-size: 0.9em">Source:@item.SourceName, Status:@item.Status, Started:@item.ActivityStartTime.TimeOfDay.ToString("g"), Duration:@item.TotalDuration.TotalMilliseconds.ToString("F5") ms</span></pre>
+        @if (item.Extras?.Any(x => !string.IsNullOrWhiteSpace(x)) is true)
+        {
+            <pre style="margin-left: @(item.GetDepth(_telemetry) * 10)px;" class="telemetry-code-item-detail">@string.Join(", ", item.Extras)</pre>
+        }
+    }
+</div>
+
+@code {
+
+    record TelemetryData(string TraceId, DateTime ActivityStartTime, string ActivityId, string ActivityName, TimeSpan TotalDuration, string? ParentId, string? SourceName, string? Status, string[]? Extras)
+    {
+        static string[] _colorTable =
+        {
+            "#FA8072",
+            "#0000000",
+            "#2F4F4FF",
+            "#696969",
+            "#4682B4",
+            "#05F9EA0",
+            "#556B2F",
+            "#838A06",
+            "#076F39",
+            "#072B6F",
+            "#5A076F",
+            "#6F0753"
+        };
+
+        public string ToColorCode() => _colorTable[Math.Abs(TraceId.GetHashCode()) % 12];
+
+        public int GetDepth(List<TelemetryData> telemetry)
+        {
+            if (string.IsNullOrEmpty(ParentId))
+                return 0;
+            return 1 + telemetry.FirstOrDefault(x => x.ActivityId == ParentId)?.GetDepth(telemetry) ?? 0;
+        }
+    };
+
+    private HubConnection? _hubConnection;
+    private List<TelemetryData> _telemetry = new();
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/telemetryhub"))
+            .WithAutomaticReconnect()
+            .Build();
+
+        _hubConnection.On<TelemetryData>("ReceiveTelemetry", telemetry =>
+        {
+            PlaceIncomingTelemetryInOrderedTelemetryData(telemetry);
+            InvokeAsync(StateHasChanged);
+        });
+
+        await _hubConnection.StartAsync();
+    }
+
+    void PlaceIncomingTelemetryInOrderedTelemetryData(TelemetryData incoming)
+    {
+        _telemetry.Add(incoming);
+        _telemetry.Sort((l, r)
+            => DateTime.Compare(l.ActivityStartTime, r.ActivityStartTime));
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.DisposeAsync();
+        }
+    }
+
+    void Clear()
+    {
+        _telemetry.Clear();
+    }
+
+}

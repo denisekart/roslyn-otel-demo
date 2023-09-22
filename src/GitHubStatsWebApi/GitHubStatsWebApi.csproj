@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Features>InterceptorsPreview</Features>
+        <LangVersion>preview</LangVersion>
+        <UserSecretsId>49e5e0f7-1c75-49c6-98c5-a07e6a283445</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\TelemetrySourceGenerator\TelemetrySourceGenerator.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false"
+                          PrivateAssets="All"/>
+        <ProjectReference Include="..\GitHubStatsWebClient\GitHubStatsWebClient.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.11"/>
+        <PackageReference Include="OpenTelemetry" Version="1.6.0"/>
+        <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.6.0"/>
+        <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.6.0"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.5.1"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.5.1-beta.1"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.5.1-beta.1"/>
+    </ItemGroup>
+
+</Project>
