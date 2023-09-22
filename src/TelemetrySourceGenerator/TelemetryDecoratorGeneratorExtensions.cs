@@ -112,13 +112,13 @@ internal static class TelemetryDecoratorGeneratorExtensions
                 if (operations.supportsServiceCollectionOperations)
                 {
                     var generatedSource = StaticSources.DecoratorExtensionsSource(assemblyName!);
-                    ctx.AddSource("DecoratedServiceCollectionDecorationExtensions.g.cs", generatedSource);
+                    ctx.AddSource("ServiceCollectionDecorationExtensions.g.cs", generatedSource);
                 }
 
                 if (operations.supportsServiceProviderOperations)
                 {
                     var generatedSource = StaticSources.BuildServiceProviderSource(assemblyName!);
-                    ctx.AddSource("DecoratedServiceProviderRegistrationExtensions.ServiceProvider.g.cs", generatedSource);
+                    ctx.AddSource("ServiceProviderTelemetryExtensions.g.cs", generatedSource);
                 }
             });
 
@@ -178,7 +178,7 @@ internal static class TelemetryDecoratorGeneratorExtensions
                 }
 
                 var generatedSource = StaticSources.BuildWebHostBuilderSource(source.Left!);
-                ctx.AddSource("DecoratedWebApplicationDecorationExtensions.g.cs", generatedSource);
+                ctx.AddSource("WebApplicationTelemetryExtensions.g.cs", generatedSource);
             });
 
         return initContext;
@@ -253,7 +253,7 @@ internal static class TelemetryDecoratorGeneratorExtensions
                           #nullable restore
                           """;
 
-                    ctx.AddSource($"Interceptor{container.Name}{method.Identifier}Of{caller.Symbol.ContainingSymbol.Name}_{callPosition.Line}_{callPosition.Character}.g.cs", generated);
+                    ctx.AddSource($"Interceptor{container.Name}{method.Identifier}OnCallsite{caller.Symbol.ContainingSymbol.Name}_L{callPosition.Line}_C{callPosition.Character}.g.cs", generated);
                 }
             });
 

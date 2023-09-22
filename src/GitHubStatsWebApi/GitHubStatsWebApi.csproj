@@ -3,7 +3,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <Features>InterceptorsPreview</Features>
+        <!--<Features>InterceptorsPreview</Features>-->
         <LangVersion>preview</LangVersion>
         <UserSecretsId>49e5e0f7-1c75-49c6-98c5-a07e6a283445</UserSecretsId>
     </PropertyGroup>
@@ -13,7 +13,7 @@
                           OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false"
                           PrivateAssets="All"/>
-        <ProjectReference Include="..\GitHubStatsWebClient\GitHubStatsWebClient.csproj" />
+        <ProjectReference Include="..\GitHubStatsWebClient\GitHubStatsWebClient.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
