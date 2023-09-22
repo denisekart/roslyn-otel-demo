@@ -396,3 +396,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# local file cache
+src/GitHubStatsWebApi/*_local_github_stats.json
