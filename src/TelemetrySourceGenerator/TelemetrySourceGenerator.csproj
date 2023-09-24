@@ -6,6 +6,9 @@
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <IsRoslynComponent>true</IsRoslynComponent>
+        <IsPackable>false</IsPackable>
+        <PackageId>TelemetrySourceGenerator</PackageId>
     </PropertyGroup>
 
     <ItemGroup>

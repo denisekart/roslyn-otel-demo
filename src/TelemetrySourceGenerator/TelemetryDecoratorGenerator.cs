@@ -5,7 +5,6 @@ namespace TelemetrySourceGenerator;
 [Generator(LanguageNames.CSharp)]
 public sealed class TelemetryDecoratorGenerator : IIncrementalGenerator
 {
-    /// <inheritdoc />
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         context
@@ -14,5 +13,6 @@ public sealed class TelemetryDecoratorGenerator : IIncrementalGenerator
             .RegisterOutputForDecoratedInterfaceTypeMaps()
             .RegisterOutputForDependencyInjectionExtensions()
             .RegisterOutputForWebApplicationExtensions();
+        // .RegisterOutputForInterceptors()
     }
 }

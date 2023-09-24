@@ -20,7 +20,9 @@ internal static class TextGeneration
                 .SelectMany(impl => impl.node.BaseList!.Types.Where(baseType => baseType is SimpleBaseTypeSyntax { Type: GenericNameSyntax }).Select(x => (baseType: x, impl.semanticModel)))
                 .Select(x => (name: (GenericNameSyntax)x.baseType.Type, x.semanticModel))
                 .Where(x => x.name.Identifier.ValueText == s.identifier.ValueText)
-                .Select(x => x.name.TypeArgumentList.Arguments.Select(arg => ModelExtensions.GetSymbolInfo(x.semanticModel, arg).Symbol as INamedTypeSymbol))
+                .Select(x => x.name.TypeArgumentList.Arguments
+                    .Select(arg => ModelExtensions.GetSymbolInfo(x.semanticModel, arg).Symbol as INamedTypeSymbol)
+                    .OfType<INamedTypeSymbol>())
                 .ToArray();
             var ns = SimpleInterfaceDecoratorSyntaxRewriter.GenerateNamespace(s.rootNode);
             var generatedClassName = SimpleInterfaceDecoratorSyntaxRewriter.GenerateClassName(s.identifier);
@@ -29,13 +31,13 @@ internal static class TextGeneration
             if (genericTypeVariations is { Length: > 0 })
             {
                 return genericTypeVariations
-                    .Select(v => string.Join(",", v.Select(a => $"{a!.ContainingNamespace.Name}.{a.Name}")))
+                    .Select(v => string.Join(",", v.Select(a => $"{a?.ContainingNamespace.Name}.{a?.Name}")))
                     .Select(v => ($"{ns}.{interfaceName}<{v}>", $"{ns}.{generatedClassName}<{v}>"));
             }
 
             return new[] { ($"{ns}.{interfaceName}", $"{ns}.{generatedClassName}") };
         });
-    
+
     /// <summary>
     /// Returns a valid intercepted invocation file path normalized and applicable for interception
     /// </summary>
@@ -44,7 +46,7 @@ internal static class TextGeneration
         return compilation.Options.SourceReferenceResolver?.NormalizePath(tree.FilePath, baseFilePath: null) ?? tree.FilePath;
     }
 
-    internal static (string text, bool isAsync) GetMethodCallInvocationWithReturn(MethodDeclarationSyntax method, string interceptedMethodInvocation)
+    internal static (string text, bool isAsync) GetMethodCallInvocationWithReturnKind(MethodDeclarationSyntax method, string interceptedMethodInvocation)
     {
         return method switch
         {
@@ -54,4 +56,11 @@ internal static class TextGeneration
             _ => ($"return {interceptedMethodInvocation}", false)
         };
     }
+
+    internal static string ToEnableNullableDirectiveDecoratedString(this string source)
+        => $"""
+            #nullable enable
+            {source}
+            #nullable restore
+            """;
 }

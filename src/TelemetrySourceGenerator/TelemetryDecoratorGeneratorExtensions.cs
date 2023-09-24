@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -37,7 +36,8 @@ internal static class TelemetryDecoratorGeneratorExtensions
 
                 var rewriter = new SimpleInterfaceDecoratorSyntaxRewriter(
                     node.identifier,
-                    methodName => StaticStatements.BeforeOperationStatement(assemblyName!, $"Decorated.{{_baseImplementationType.Name}}.{methodName}"),
+                    methodName =>
+                        StaticStatements.BeforeOperationStatement(assemblyName!, $"Decorated.{{_baseImplementationType.Name}}.{methodName}"),
                     StaticStatements.FailedOperationStatement,
                     StaticStatements.AfterOperationStatement,
                     additionalBaseMembers);
@@ -46,7 +46,7 @@ internal static class TelemetryDecoratorGeneratorExtensions
                     .NormalizeWhitespace()
                     .ToFullString();
 
-                ctx.AddSource($"{rewriter.HintSafeGeneratedClassName}.g.cs", generatedDecorator);
+                ctx.AddSource($"{rewriter.HintSafeGeneratedClassName}.g.cs", generatedDecorator.ToEnableNullableDirectiveDecoratedString());
             });
 
         return initContext;
@@ -60,6 +60,7 @@ internal static class TelemetryDecoratorGeneratorExtensions
                 (node, _) => node is ClassDeclarationSyntax { BaseList.Types.Count: > 0 },
                 (node, _) => (node: (ClassDeclarationSyntax)node.Node, node.SemanticModel))
             .Collect();
+
         // all public interfaces
         var publicInterfacesProvider = initContext.SyntaxProvider
             .CreateSyntaxProvider(
@@ -77,7 +78,8 @@ internal static class TelemetryDecoratorGeneratorExtensions
             )
             .Collect();
 
-        var combinedSources = relevantSyntaxProvider.Combine(initContext.AssemblyInfoProvider());
+        var combinedSources = relevantSyntaxProvider
+            .Combine(initContext.AssemblyInfoProvider());
 
         initContext.RegisterSourceOutput(combinedSources,
             (ctx, source) =>
@@ -99,10 +101,13 @@ internal static class TelemetryDecoratorGeneratorExtensions
             .Collect()
             .Select((x, _) => new
             {
-                supportsServiceCollectionOperations = x.Any(d => d.Display?.Contains("Microsoft.Extensions.DependencyInjection") is true),
-                supportsServiceProviderOperations = x.Any(d => d.Display?.Contains("Microsoft.Extensions.DependencyInjection.dll") is true)
+                supportsServiceCollectionOperations = x.Any(d => 
+                    d.Display?.Contains("Microsoft.Extensions.DependencyInjection") is true),
+                supportsServiceProviderOperations = x.Any(d 
+                    => d.Display?.Contains("Microsoft.Extensions.DependencyInjection.dll") is true)
             });
-        var combinedProvider = initContext.AssemblyInfoProvider().Combine(supportingOperationsProvider);
+        var combinedProvider = initContext.AssemblyInfoProvider()
+            .Combine(supportingOperationsProvider);
 
         initContext.RegisterSourceOutput(combinedProvider,
             (ctx, source) =>
@@ -138,9 +143,8 @@ internal static class TelemetryDecoratorGeneratorExtensions
             (ctx, source) =>
             {
                 var (existingType, (assemblyName, assemblyVersion)) = source;
-                var hasExistingTelemetryTypeDefined = !existingType.IsEmpty &&
-                    existingType.Any(x =>
-                        x.SemanticModel.GetTypeInfo(x.Node).Type?.ContainingNamespace.Name == assemblyName);
+                var hasExistingTelemetryTypeDefined = !existingType.IsEmpty 
+                    && existingType.Any(x => x.SemanticModel.GetTypeInfo(x.Node).Type?.ContainingNamespace.Name == assemblyName);
                 if (hasExistingTelemetryTypeDefined)
                 {
                     return;
@@ -155,41 +159,30 @@ internal static class TelemetryDecoratorGeneratorExtensions
 
     internal static IncrementalGeneratorInitializationContext RegisterOutputForWebApplicationExtensions(this IncrementalGeneratorInitializationContext initContext)
     {
-        var assemblyNameSource = initContext.CompilationProvider
-            .Select((x, _) => x.AssemblyName);
-        var referencesSource = initContext.MetadataReferencesProvider
+        var referencesProvider = initContext.MetadataReferencesProvider
             .Where(r => r.Display?.Contains("Microsoft.AspNetCore.App.Ref") is true)
             .Collect()
-            .Select((x, _) =>
-            {
-                return new
-                {
-                    supportsWebApplicationBuilderOperations = x.Any(d => d.Display?.Contains("Microsoft.AspNetCore.App.Ref") is true),
-                };
-            });
-        var combinedSource = assemblyNameSource.Combine(referencesSource);
+            .Select((x, _) 
+                => x.Any(d => d.Display?.Contains("Microsoft.AspNetCore.App.Ref") is true));
+        
+        var combinedSource = initContext.AssemblyInfoProvider()
+            .Combine(referencesProvider);
 
         initContext.RegisterSourceOutput(combinedSource,
             (ctx, source) =>
             {
-                if (!source.Right.supportsWebApplicationBuilderOperations)
+                var ((assemblyName, _), supportsWebApplicationBuilderOperations) = source;
+                if (!supportsWebApplicationBuilderOperations)
                 {
                     return;
                 }
 
-                var generatedSource = StaticSources.BuildWebHostBuilderSource(source.Left!);
+                var generatedSource = StaticSources.BuildWebHostBuilderSource(assemblyName!);
                 ctx.AddSource("WebApplicationTelemetryExtensions.g.cs", generatedSource);
             });
 
         return initContext;
     }
-
-    private static readonly SyntaxKind[] RemovableMethodModifiers =
-    {
-        SyntaxKind.PublicKeyword,
-        SyntaxKind.PrivateKeyword,
-        SyntaxKind.StaticKeyword
-    };
 
     internal static IncrementalGeneratorInitializationContext RegisterOutputForInterceptors(this IncrementalGeneratorInitializationContext initContext)
     {
@@ -212,13 +205,13 @@ internal static class TelemetryDecoratorGeneratorExtensions
                 foreach (var caller in callers)
                 {
                     var container = caller.Symbol!.ContainingType;
-                    
+
                     var parameters = GenerateInterceptorParameters(container, caller);
                     var interceptedCall = GenerateInterceptedCall(method, out var isAsync);
                     var modifiers = GenerateInterceptorModifiers(method, isAsync);
                     var interceptorAttributeList = GenerateInterceptorAttributeList(caller, compilation, out var callPosition);
                     var usingDirectives = GenerateUsingDirectives(method);
-                    
+
                     //lang=cs
                     var generated =
                         $$"""
@@ -253,7 +246,7 @@ internal static class TelemetryDecoratorGeneratorExtensions
                           #nullable restore
                           """;
 
-                    ctx.AddSource($"Interceptor{container.Name}{method.Identifier}OnCallsite{caller.Symbol.ContainingSymbol.Name}_L{callPosition.Line}_C{callPosition.Character}.g.cs", generated);
+                    ctx.AddSource($"Interceptor{container.Name}{method.Identifier}ForCallSite{caller.Symbol.ContainingSymbol.Name}_L{callPosition.Line}_C{callPosition.Character}.g.cs", generated);
                 }
             });
 
@@ -280,7 +273,7 @@ internal static class TelemetryDecoratorGeneratorExtensions
         string GenerateInterceptedCall(MethodDeclarationSyntax method, out bool isAsync)
         {
             var interceptedMethodInvocation = $"@source.{method.Identifier}({string.Join(", ", method.ParameterList.Parameters.Select(x => x.Identifier))});";
-            (var interceptedCall, isAsync) = TextGeneration.GetMethodCallInvocationWithReturn(method, interceptedMethodInvocation);
+            (var interceptedCall, isAsync) = TextGeneration.GetMethodCallInvocationWithReturnKind(method, interceptedMethodInvocation);
             return interceptedCall;
         }
 
@@ -314,6 +307,15 @@ internal static class TelemetryDecoratorGeneratorExtensions
                     .Select(x => $"{x}"));
         }
     }
+
+    #region Helper methods
+
+    private static readonly SyntaxKind[] RemovableMethodModifiers =
+    {
+        SyntaxKind.PublicKeyword,
+        SyntaxKind.PrivateKeyword,
+        SyntaxKind.StaticKeyword
+    };
 
     private static IncrementalValuesProvider<(MethodDeclarationSyntax Method, ISymbol? Symbol, ImmutableArray<(InvocationExpressionSyntax Invocation, ISymbol? CallingSymbol)> Invocations, Compilation Compilation, string? Name)> InterceptorsAggregateProvider(this IncrementalGeneratorInitializationContext initContext)
     {
@@ -380,4 +382,6 @@ internal static class TelemetryDecoratorGeneratorExtensions
             });
         return targetsSource;
     }
+
+    #endregion
 }

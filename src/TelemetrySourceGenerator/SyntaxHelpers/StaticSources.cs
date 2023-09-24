@@ -141,7 +141,7 @@ internal static class StaticSources
                      public static readonly (Type interfaceType, Type decoratorType)[] Decorators = new []
                      {
                          {{
-                             string.Join(",\n", namePairs
+                             string.Join(",\n", (namePairs ?? Enumerable.Empty<(string, string)>())
                                  .Select(pair
                                      => $"(typeof({pair.fullDecoratedTypeName}), typeof({pair.fullDecoratorTypeName}))"))
                          }}
@@ -164,19 +164,19 @@ internal static class StaticSources
              }
              """;
 
-    public static string InterceptsLocationAttributeSource =>
+    public static string InterceptsLocationAttributeSource
         // lang=csharp
-        """
-        namespace System.Runtime.CompilerServices
-        {
-            [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-            file sealed class InterceptsLocationAttribute(string filePath, int line, int column) : Attribute { }
-        }
-        """;
+        => """
+           namespace System.Runtime.CompilerServices
+           {
+               [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+               file sealed class InterceptsLocationAttribute(string filePath, int line, int column) : Attribute { }
+           }
+           """;
 
-    public static string InterceptsLocationAttributeUsageSource(string path, int line, int column) =>
+    public static string InterceptsLocationAttributeUsageSource(string path, int line, int column)
         // lang=csharp
-        $$"""
-          [System.Runtime.CompilerServices.InterceptsLocationAttribute(filePath: @"{{path}}", line: {{line}}, column: {{column}})]
-          """;
+        => $"""
+            [System.Runtime.CompilerServices.InterceptsLocationAttribute(filePath: @"{path}", line: {line}, column: {column})]
+            """;
 }

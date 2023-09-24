@@ -10,20 +10,20 @@ builder.AddTelemetry();
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddInfrastructureServices();
 
-var app = builder.Build(); 
+var app = builder.Build(enableAutoInstrumentation: true); 
 
 app.ConfigureRequestPipelineDefaults();
 
 // API routes
 var api = app.MapGroup("api");
-api.MapGet("/stats/{username?}",
-        async (string? username, IGithubStatsService statsService) =>
-        {
-            var stats = await statsService.GetStatsForUser(new StatsRequest(username));
-            return TypedResults.Json(stats);
-        })
-    .WithDescription("Returns Github statistics for username provided in the request");
+api.MapGet("/stats/{username?}", HandleGetStats).WithDescription("Returns Github statistics for user");
 
 app.ConfigureUiPipeline();
 
 app.Run();
+
+static async Task<IResult> HandleGetStats(string? username, IGithubStatsService statsService)
+{
+    var stats = await statsService.GetStatsForUser(new StatsRequest(username));
+    return TypedResults.Json(stats);
+}

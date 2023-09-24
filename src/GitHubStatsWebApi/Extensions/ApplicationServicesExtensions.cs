@@ -10,10 +10,21 @@ namespace GitHubStatsWebApi.Extensions;
 
 public static class ApplicationServicesExtensions
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
+    public static void AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddMemoryCache(opts => opts.ExpirationScanFrequency = TimeSpan.FromSeconds(2));
         services.AddOptions<GithubOptions>().Bind(configuration.GetSection(GithubOptions.Section));
+
+        services.AddSingleton(_ => new RateLimiter(timeoutInSeconds: 30));
+
+        services.AddTransient<IGitHubTypedStatsProvider<GithubApiStatsProvider>, GithubApiStatsProvider>();
+        services.AddTransient<IGitHubTypedStatsProvider<GithubRateLimitingStatsProvider>, GithubRateLimitingStatsProvider>();
+        services.AddTransient<IGitHubTypedStatsProvider<GithubStaleLocalStatsProvider>, GithubStaleLocalStatsProvider>();
+        services.AddTransient<IGithubStatsProvider, GithubCachedStatsProvider>();
+
+        services.AddTransient<IGithubStatsService, GithubStatsService>();
+        services.AddTransient<IValidator<StatsRequest>, GithubStatsRequestValidator>();
+        
         services.AddHttpClient(GithubApiStatsProvider.GithubApiClientName,
             (provider, client) =>
             {
@@ -27,30 +38,16 @@ public static class ApplicationServicesExtensions
                 client.DefaultRequestHeaders.UserAgent.Clear();
                 client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("DecoratorsWebApi", "1.0"));
             });
-
-        services.AddSingleton(_ => new RateLimiter(30));
-
-        services.AddTransient<IGitHubTypedStatsProvider<GithubApiStatsProvider>, GithubApiStatsProvider>();
-        services.AddTransient<IGitHubTypedStatsProvider<GithubRateLimitingStatsProvider>, GithubRateLimitingStatsProvider>();
-        services.AddTransient<IGitHubTypedStatsProvider<GithubStaleLocalStatsProvider>, GithubStaleLocalStatsProvider>();
-        services.AddTransient<IGithubStatsProvider, GithubCachedStatsProvider>();
-
-        services.AddTransient<IGithubStatsService, GithubStatsService>();
-        services.AddTransient<IValidator<StatsRequest>, GithubStatsRequestValidator>();
-
-        return services;
     }
 
-    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
+    public static void AddInfrastructureServices(this IServiceCollection services)
     {
         services.AddProblemDetails();
         services.AddSignalR();
         services.AddResponseCompression(opts => opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" }));
-
-        return services;
     }
 
-    public static WebApplication ConfigureRequestPipelineDefaults(this WebApplication app)
+    public static void ConfigureRequestPipelineDefaults(this WebApplication app)
     {
         app.UseExceptionHandler();
         if (app.Environment.IsDevelopment())
@@ -62,11 +59,9 @@ public static class ApplicationServicesExtensions
         {
             app.UseResponseCompression();
         }
-
-        return app;
     }
     
-    public static WebApplication ConfigureUiPipeline(this WebApplication app)
+    public static void ConfigureUiPipeline(this WebApplication app)
     {
         // Real time communication 
         app.MapHub<TelemetryHub>("/telemetryhub");
@@ -75,7 +70,5 @@ public static class ApplicationServicesExtensions
         app.UseBlazorFrameworkFiles();
         app.MapFallbackToFile("index.html");
         app.UseStaticFiles();
-
-        return app;
     }
 }

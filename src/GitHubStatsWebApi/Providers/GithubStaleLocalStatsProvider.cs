@@ -20,7 +20,7 @@ public class GithubStaleLocalStatsProvider(IHostEnvironment hostEnvironment, IGi
         }
         catch
         {
-            // catch all exceptions
+            // catch all exceptions and attempt to recover with locally stored data
         }
 
         var filename = ToFilename(username);

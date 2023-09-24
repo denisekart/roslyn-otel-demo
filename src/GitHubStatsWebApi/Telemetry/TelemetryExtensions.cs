@@ -8,7 +8,8 @@ internal static class TelemetryExtensions
     internal static void AddTelemetry(this WebApplicationBuilder? app)
     {
         ArgumentNullException.ThrowIfNull(app);
-
+        app.Services.AddSingleton<SignalRHubExporter>();
+        
         app.Services
             .AddOpenTelemetry()
             .ConfigureResource(resource =>
@@ -25,7 +26,5 @@ internal static class TelemetryExtensions
                 tracer.AddOtlpExporter();
                 tracer.AddProcessor<SignalRHubExporterProcessor>();
             });
-
-        app.Services.AddSingleton<SignalRHubExporter>();
     }
 }
