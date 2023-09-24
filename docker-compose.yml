@@ -1,0 +1,20 @@
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib
+    command: [ "--config=/conf/otel-collector-config.yml" ]
+    volumes:
+      - ./otel-collector-config.yml:/conf/otel-collector-config.yml
+    ports:
+      - "4317:4317" # open telemetry gRPC
+      - "13133:13133" # healthcheck
+      - "55679:55679" # zpages
+    depends_on: 
+      - jaeger
+  
+  # visit http://localhost:16686
+  jaeger:
+    image: jaegertracing/all-in-one
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"

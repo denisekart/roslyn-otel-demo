@@ -1,0 +1,1 @@
+docker stack deploy demo-telemetry --compose-file .\docker-compose.yml
