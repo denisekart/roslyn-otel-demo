@@ -4,7 +4,6 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <LangVersion>preview</LangVersion>
-        <Features>InterceptorsPreview</Features>
         <UserSecretsId>49e5e0f7-1c75-49c6-98c5-a07e6a283445</UserSecretsId>
     </PropertyGroup>
 

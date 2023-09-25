@@ -10,7 +10,7 @@ builder.AddTelemetry();
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddInfrastructureServices();
 
-var app = builder.Build(enableAutoInstrumentation: true);
+var app = builder.Build(); 
 
 app.ConfigureRequestPipelineDefaults();
 

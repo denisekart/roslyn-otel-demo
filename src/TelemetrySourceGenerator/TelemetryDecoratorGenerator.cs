@@ -13,6 +13,5 @@ public sealed class TelemetryDecoratorGenerator : IIncrementalGenerator
             .RegisterOutputForDecoratedInterfaceTypeMaps()
             .RegisterOutputForDependencyInjectionExtensions()
             .RegisterOutputForWebApplicationExtensions();
-        // .RegisterOutputForInterceptors()
     }
 }
