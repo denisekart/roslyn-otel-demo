@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using GitHubStatsWebApi;
 using GitHubStatsWebApi.Application;
 using GitHubStatsWebApi.Extensions;
@@ -26,4 +27,13 @@ static async Task<IResult> HandleGetStats(string? username, IGithubStatsService 
 {
     var stats = await statsService.GetStatsForUser(new StatsRequest(username));
     return TypedResults.Json(stats);
+}
+
+namespace GitHubStatsWebApi
+{
+    public static class DefaultActivitySource
+    {
+        public static readonly ActivitySource ActivitySource =
+            new("GitHubStatsWebApi", "1.0.0");
+    }
 }
