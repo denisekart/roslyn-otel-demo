@@ -24,12 +24,5 @@
         <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.5.1-beta.1"/>
         <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.5.1-beta.1"/>
     </ItemGroup>
-
-    <!--Fix for issue that causes rider to not recognize generated symbols-->
-    <PropertyGroup>
-        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-    </PropertyGroup>
-<!--    <ItemGroup>-->
-<!--        <Compile Include="obj\$(Configuration)\$(TargetFramework)\generated\**\*.g.cs"/>-->
-<!--    </ItemGroup>-->
+    
 </Project>
