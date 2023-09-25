@@ -108,7 +108,7 @@ internal static class StaticSources
              #nullable enable
              namespace {{@namespace}}
              {
-                 internal static partial class TelemetryDecoratorWebApplicationRegistrationExtensions
+                 internal static class TelemetryDecoratorWebApplicationExtensions
                  {
                      public static Microsoft.AspNetCore.Builder.WebApplication Build(this Microsoft.AspNetCore.Builder.WebApplicationBuilder builder, bool enableAutoInstrumentation)
                      {

@@ -101,9 +101,9 @@ internal static class TelemetryDecoratorGeneratorExtensions
             .Collect()
             .Select((x, _) => new
             {
-                supportsServiceCollectionOperations = x.Any(d => 
+                supportsServiceCollectionOperations = x.Any(d =>
                     d.Display?.Contains("Microsoft.Extensions.DependencyInjection") is true),
-                supportsServiceProviderOperations = x.Any(d 
+                supportsServiceProviderOperations = x.Any(d
                     => d.Display?.Contains("Microsoft.Extensions.DependencyInjection.dll") is true)
             });
         var combinedProvider = initContext.AssemblyInfoProvider()
@@ -143,7 +143,7 @@ internal static class TelemetryDecoratorGeneratorExtensions
             (ctx, source) =>
             {
                 var (existingType, (assemblyName, assemblyVersion)) = source;
-                var hasExistingTelemetryTypeDefined = !existingType.IsEmpty 
+                var hasExistingTelemetryTypeDefined = !existingType.IsEmpty
                     && existingType.Any(x => x.SemanticModel.GetTypeInfo(x.Node).Type?.ContainingNamespace.Name == assemblyName);
                 if (hasExistingTelemetryTypeDefined)
                 {
@@ -160,11 +160,11 @@ internal static class TelemetryDecoratorGeneratorExtensions
     internal static IncrementalGeneratorInitializationContext RegisterOutputForWebApplicationExtensions(this IncrementalGeneratorInitializationContext initContext)
     {
         var referencesProvider = initContext.MetadataReferencesProvider
-            .Where(r => r.Display?.Contains("Microsoft.AspNetCore.App.Ref") is true)
+            .Where(r => r.Display?.Contains("Microsoft.AspNetCore") is true)
             .Collect()
-            .Select((x, _) 
-                => x.Any(d => d.Display?.Contains("Microsoft.AspNetCore.App.Ref") is true));
-        
+            .Select((x, _)
+                => x.Any(d => d.Display?.Contains("Microsoft.AspNetCore") is true));
+
         var combinedSource = initContext.AssemblyInfoProvider()
             .Combine(referencesProvider);
 
@@ -246,7 +246,7 @@ internal static class TelemetryDecoratorGeneratorExtensions
                           #nullable restore
                           """;
 
-                    ctx.AddSource($"Interceptor{container.Name}{method.Identifier}ForCallSite{caller.Symbol.ContainingSymbol.Name}_L{callPosition.Line}_C{callPosition.Character}.g.cs", generated);
+                    ctx.AddSource($"Interceptor{container.Name}{method.Identifier}ForCallSite{caller.Symbol.ContainingSymbol.Name}_L{callPosition.Line+1}_C{callPosition.Character+1}.g.cs", generated);
                 }
             });
 
@@ -294,7 +294,7 @@ internal static class TelemetryDecoratorGeneratorExtensions
         {
             var normalizedInvocationPath = TextGeneration.GetInterceptorFilePath(caller.Invocation.SyntaxTree, compilation);
             callPosition = ((MemberAccessExpressionSyntax)caller.Invocation.Expression).Name.GetLocation().GetLineSpan().StartLinePosition;
-            return StaticSources.InterceptsLocationAttributeUsageSource(normalizedInvocationPath, callPosition.Line, callPosition.Character);
+            return StaticSources.InterceptsLocationAttributeUsageSource(normalizedInvocationPath, callPosition.Line + 1, callPosition.Character + 1);
         }
 
         string GenerateUsingDirectives(MethodDeclarationSyntax method)
