@@ -129,7 +129,7 @@ internal static class TelemetryDecoratorGeneratorExtensions
 
         return initContext;
     }
-
+    
     internal static IncrementalGeneratorInitializationContext RegisterOutputForTelemetry(this IncrementalGeneratorInitializationContext initContext)
     {
         var existingTelemetryTypeProvider = initContext.SyntaxProvider
@@ -144,7 +144,7 @@ internal static class TelemetryDecoratorGeneratorExtensions
             {
                 var (existingType, (assemblyName, assemblyVersion)) = source;
                 var hasExistingTelemetryTypeDefined = !existingType.IsEmpty
-                    && existingType.Any(x => x.SemanticModel.GetTypeInfo(x.Node).Type?.ContainingNamespace.Name == assemblyName);
+                    && existingType.Any(x => x.SemanticModel.GetDeclaredSymbol(x.Node)?.ContainingNamespace.Name == assemblyName);
                 if (hasExistingTelemetryTypeDefined)
                 {
                     return;

@@ -5,14 +5,14 @@ namespace TelemetrySourceGeneratorTests7;
 public class TelemetryTests
 {
     [Fact]
-    public void ShouldGenerateDefaultAssemblySource()
+    public void ShouldGenerateDefaultActivitySource()
     {
         // Act
         var (compilation, diagnostics) =
             //lang=cs
             """
-                public interface IFoo{}
-                """.RunGenerator<TelemetryDecoratorGenerator>();
+            public interface IFoo{}
+            """.RunGenerator<TelemetryDecoratorGenerator>();
 
         // Assert
         diagnostics.Should().BeEmpty();
