@@ -58,12 +58,12 @@
         }
         catch
         {
-            _problem = new Problem("No data", "400", "There was nothing returned. Are you sure the user exists?");
+            _problem = new Problem("No data", 400, "There was nothing returned. Are you sure the user exists?");
             _response = null;
         }
     }
 
     public record StatsResponse(string? Name, string? GeoLocation, int? PublicRepositories, int? NumberOfFollowers, DateTime? LastActivity);
 
-    public record Problem(string Title, string Status, string Detail);
+    public record Problem(string Title, int Status, string Detail);
 }

@@ -12,7 +12,7 @@
         <pre style="margin-left: @(item.GetDepth(_telemetry) * 15)px;" class="telemetry-code-item"><span style="color: @item.ToColorCode(); font-weight: bolder">@item.ActivityName</span>, <span style="font-size: 0.9em">Source:@item.SourceName, Status:@item.Status, Started:@item.ActivityStartTime.TimeOfDay.ToString("g"), Duration:@item.TotalDuration.TotalMilliseconds.ToString("F5") ms</span></pre>
         @if (item.Extras?.Any(x => !string.IsNullOrWhiteSpace(x)) is true)
         {
-            <pre style="margin-left: @(item.GetDepth(_telemetry) * 10)px;" class="telemetry-code-item-detail">@string.Join(", ", item.Extras)</pre>
+            <pre style="margin-left: @(item.GetDepth(_telemetry) * 15)px;" class="telemetry-code-item-detail">@string.Join(", ", item.Extras)</pre>
         }
     }
 </div>
