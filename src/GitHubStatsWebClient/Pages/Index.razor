@@ -5,9 +5,8 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
-<label for="basic-url">GitHub user name</label>
-<div class="input-group mb-3">
+<label for="basic-url">Enter GitHub User Name</label>
+<div class="input-group mb-3 w-75">
     <div class="input-group-prepend">
         <span class="input-group-text" id="basic-addon3">https://api.github.com/users/</span>
     </div>
@@ -17,12 +16,10 @@
 
 @if (_response is not null && _problem is null)
 {
-    <ul class="list-group list-group-flush">
-        <li class="list-group-item"><b>@_response?.Name</b> is </li>
-        <li class="list-group-item">located in <b>@_response?.GeoLocation</b>,</li>
+    <ul class="list-group list-group-flush w-75">
+        <li class="list-group-item"><b>@_response?.Name</b> is located in <b>@_response?.GeoLocation</b>,</li>
         <li class="list-group-item">was last active on <b>@_response?.LastActivity</b>,</li>
-        <li class="list-group-item">has <b>@_response?.PublicRepositories public repositories</b>,</li>
-        <li class="list-group-item">and has <b>@_response?.NumberOfFollowers followers</b>.</li>
+        <li class="list-group-item">has <b>@_response?.PublicRepositories public repositories</b>, and <b>@_response?.NumberOfFollowers followers</b>.</li>
     </ul>
 }
 @if (_problem is not null)
