@@ -129,7 +129,7 @@ internal static class TelemetryDecoratorGeneratorExtensions
 
         return initContext;
     }
-    
+
     internal static IncrementalGeneratorInitializationContext RegisterOutputForTelemetry(this IncrementalGeneratorInitializationContext initContext)
     {
         var existingTelemetryTypeProvider = initContext.SyntaxProvider
@@ -246,7 +246,7 @@ internal static class TelemetryDecoratorGeneratorExtensions
                           #nullable restore
                           """;
 
-                    ctx.AddSource($"Interceptor{container.Name}{method.Identifier}ForCallSite{caller.Symbol.ContainingSymbol.Name}_L{callPosition.Line+1}_C{callPosition.Character+1}.g.cs", generated);
+                    ctx.AddSource($"Interceptor{container.Name}{method.Identifier}ForCallSite{caller.Symbol.ContainingSymbol.Name}_L{callPosition.Line}_C{callPosition.Character}.g.cs", generated);
                 }
             });
 
